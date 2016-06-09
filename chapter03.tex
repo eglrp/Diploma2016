@@ -35,23 +35,12 @@
 
 Главная строка в этой функции - четырнадцатая. Именно здесь, в конструкторе класса \textbf{pexpect.spawn} происходит вызов программы RTKRCV с помощью команды из переменной \textbf{spawn\textunderscore command}. С помощью ключа «-o» указывается конфигурационный файл для загрузки. Следующий важный этап - проверка запуска на ошибку. Это происходит в функции \textbf{self.expectAnswer("spawn")}. Рассмотрим эту функцию подробнее:
 
-\begin{ListingEnv}[H]
-  \caption{Метод expectAnswer класса RtkController}
-  \label{list:hwbeauty}
-  \begin{lstlisting}[language=Python]
-    def expectAnswer(self, last_command = ""):
-        a = self.child.expect(["rtkrcv>", pexpect.EOF, "error"])
-        # check rtklib output for any errors
-        if a == 1:
-            print("Encountered exception: " + str(self.child))
-            return -1
-
-        if a == 2:
-            return -2
-
-        return 1
-  \end{lstlisting}
-\end{ListingEnv}
+\lstinputlisting[
+  label={listings:RtkController_expectAnswer},
+  caption={Метод expectAnswer класса RtkContoller},
+  style={java}
+]
+{src/RtkController_expectAnswer.py}
 
 Кроме возврата кода ошибки(или успеха) операции, вызывает метод expect класса \textbf{pexpect.spawn}. В качестве единственного параметра указан список строк. Метод \textbf{expect} читает стандартный вывод запущенной программы и ждет одну из этих строк. Под опцией \textbf{pexpect.EOF} понимается окончание работы программы. Таким образом, мы получаем представление о том, что же произошло с программой, запущенной с помощью \textbf{pexpect.spawn}.
 
@@ -68,58 +57,23 @@
 
 Рассмотрим примеры работы с командами интерактивной консоли. Команды start, stop, load и shutdown работают по одной схеме: отправить команду, дождаться следующего вывода ключевой строки. К примеру, функция, запускающая вычисления:
 
-\begin{ListingEnv}[H]
-  \caption{Метод start класса RtkController}
-  \label{list:hwbeauty}
-  \begin{lstlisting}[language=Python]
-    def start(self):
-      if not self.started:
-        self.semaphore.acquire()
-        self.child.send("start\r\n")
-
-        if self.expectAnswer("start") < 0:
-          self.semaphore.release()
-          return -1
-
-        self.semaphore.release()
-        self.started = True
-        return 1
-
-      # already started
-      return 2
-  \end{lstlisting}
-\end{ListingEnv}
+\lstinputlisting[
+  label={listings:RtkController_start},
+  caption={Метод start класса RtkContoller},
+  style={java}
+]
+{src/RtkController_start.py}
 
 Взаимодействие происходит по той же схеме - отправление команды, ожидание ответа. Если ответ не содержит слово \textbf{error} (RTKLIB всегда сообщеает об ошибке в стандартный вывод), а приложение неожиданно не закончило свою работу, команда выполнена успешно.
 
 Кроме таких команд, для которых требуется лишь подтверждение отсутствия ошибки, есть команды status и obs. Они возвращают полезную информацию, которую следует прочитать и распарсить. Информация, полученная с помощью команды status понадобится для отображения текущий координаты и качества решения. Obs возвращает таблицу, которая в том числе содержит signal to noise ratio(SNR), то есть уровни видимости спутников. Эта информация будет использоваться для графика на клиентской части приложения. Общий принцип работы такой же: отправить команду, дождаться ответа. Только теперь, нужно пройти по всему выводу программы после отправки команды и выделить из него полезную информацию.
 
-\begin{ListingEnv}[H]
-  \caption{Метод getStatus класса RtkController}
-  \label{list:hwbeauty}
-  \begin{lstlisting}[language=Python]
-    def getStatus(self):
-      self.semaphore.acquire()
-      self.child.send("status\r\n")
-
-      if self.expectAnswer("get status") < 0:
-          self.semaphore.release()
-          return -1
-
-      status = self.child.before.split("\r\n")
-      if status != {}:
-          for line in status:
-              spl = line.split(":")
-
-              if len(spl) > 1:
-                  param = spl[0].strip()
-                  value = spl[1].strip()
-
-                  self.status[param] = value
-
-      ...
-  \end{lstlisting}
-\end{ListingEnv}
+\lstinputlisting[
+  label={listings:RtkController_getStatus},
+  caption={Метод getStatus класса RtkContoller},
+  style={java}
+]
+{src/RtkController_getStatus.py}
 
 Известно, что вывод команды status представляет собой набор строк, в которых параметр и его значение разделены двоеточиями. После получения подтверждения об отсутствии ошибки в выполнении, функция обращается к свойству \textbf{before}, представляющую весь вывод в виде одной строки. С помощью команды \textbf{split("\textbackslash r\textbackslash n")} можно разделить весь вывод на список отдельных строк, а затем обратиться к каждой из них с помощью цикла for. Если строка делится на две по символу «\textbf{:}», значит она содержит пару параметр-значение и подходит для добавление во внутреннюю переменную класса RtkController - status.
 
@@ -139,31 +93,21 @@
 
 Для работы этого класса используется вспомогательный класс \textbf{Config}, который принимает путь к конфигурационному файлу как единственный параметр конструктора и прочитав файл, создает словарь значений. Рассмотрим пример конфигурационного файла RTKRCV:
 
-\begin{ListingEnv}[H]
-  \caption{Отрывок конфигурационного файла RTKRCV}
-  \label{list:hwbeauty}
-  \begin{lstlisting}[language=Python]
-    inpstr1-type       =serial     # (0:off,1:serial,2:file,3:tcpsvr,4:tcpcli,7:ntripcli,8:ftp,9:http) ## Input source for onboard receiver
-    inpstr2-type       =tcpcli     # (0:off,1:serial,2:file,3:tcpsvr,4:tcpcli,7:ntripcli,8:ftp,9:http) ## Input source for base corrections
-    inpstr3-type       =off        # (0:off,1:serial,2:file,3:tcpsvr,4:tcpcli,7:ntripcli,8:ftp,9:http)
-    inpstr1-path       =ttyMFD1:230400:8:n:1:off
-  \end{lstlisting}
-\end{ListingEnv}
+\lstinputlisting[
+  label={listings:RTKLIB_conf_file},
+  caption={Отрывок конфигурационного файла RTKRCV},
+  style={java}
+]
+{src/rtkrcv_conf_snippet.conf}
 
 У некоторых строк есть комментарии. Эти комментарии, отделенные одним символом \textbf{\#}, показывают возможные варианты значений параметра. Комментарии отделенные \textbf{\#\#}, используются для подписей параметров в форме на веб-странице. При чтении файла, каждая строка читается и собирается в словарь с четырьмя полями.
 
-\begin{ListingEnv}[H]
-  \caption{Представление параметра конфигурационного файла в памяти}
-  \label{list:hwbeauty}
-  \begin{lstlisting}[language=Python]
-  item0 = {
-    "parameter": "p",
-    "value": "v",
-    "comment": "c",
-    "description": "d"
-  }
-  \end{lstlisting}
-\end{ListingEnv}
+\lstinputlisting[
+  label={listings:conf_parameter},
+  caption={Представление параметра конфигурационного файла в памяти},
+  style={java}
+]
+{src/conf_parameter.py}
 
 Этот класс используется более общим классом RTKLIB, речь о котором пойдет в следующей части.
 
@@ -192,24 +136,12 @@
 
 Еще одна важная функция, которую на себя берет класс RTKLIB - трансляция координат и уровней спутников в браузер посредством веб-сокетов. При старте в режиме ровера, создаются и запускаются два новых потока: \textbf{satellite\_ thread} и \textbf{coordinate\_ thread}. Эти потоки выполняют методы класса RTKLIB \textbf{broadcastCoordinates} и \textbf{broadcastSatellites}. Рассмотрим одну из них:
 
-\begin{ListingEnv}[H]
-  \caption{Метод broadcastSatellites класса RTKLIB}
-  \label{list:hwbeauty}
-  \begin{lstlisting}[language=Python]
-    def broadcastSatellites(self):
-      count = 0
-      while self.server_not_interrupted:
-        self.rtkc.getObs()
-        if count % 10 == 0:
-          print("Sending sat rover levels:\n" + str(self.rtkc.obs_rover))
-          print("Sending sat base levels:\n" + str(self.rtkc.obs_base))
-
-        self.socketio.emit("satellite broadcast rover", self.rtkc.obs_rover, namespace = "/test")
-        self.socketio.emit("satellite broadcast base", self.rtkc.obs_base, namespace = "/test")
-        count += 1
-        time.sleep(1)
-  \end{lstlisting}
-\end{ListingEnv}
+\lstinputlisting[
+  label={listings:RTKLIB_broadcastSatellites},
+  caption={Метод broadcastSatellites класса RTKLIB},
+  style={java}
+]
+{src/RTKLIB_broadcastSatellites.py}
 
 Эта функция заключается в бесконечном цикле, постоянно считывающем статус из RTKRCV и отправлюящем его в браузер с помощью объекта \textbf{socketio}. В случае остановки в режиме ровера, свойство \textbf{server\_ not\_ interrupted} становится \textbf{False} и поток заканчивает свое выполнение.
 
@@ -226,91 +158,52 @@
 
 Инициализация объекта сервера:
 
-\begin{ListingEnv}[H]
-  \caption{Инициализация сервера}
-  \label{list:hwbeauty}
-  \begin{lstlisting}[language=Python]
-    from flask import Flask, render_template, session, request, send_file
-    from flask.ext.socketio import SocketIO, emit, disconnect
-    from subprocess import check_output
+\lstinputlisting[
+  label={listings:server_init},
+  caption={Инициализация сервера Flask},
+  style={java}
+]
+{src/server_init.py}
 
-    app = Flask(__name__)
-    app.template_folder = "."
-    app.debug = False
-    ...
-
-    socketio = SocketIO(app)
-  \end{lstlisting}
-\end{ListingEnv}
-
-
-Фрэймворк Flask имеет модульную архитектуру, поэтому WebSocket функциональность реализована в расширении Flask-socketio. Для того чтобы подключить данное расширение, следует передать объект класса Flask в конструктор класса SocketIO. После этого переменная \textbf{app} имеет возможность обрабатывать события, связанные с веб-сокетами.
+Фрэймворк Flask имеет модульную архитектуру, поэтому WebSocket функциональность реализована в расширении Flask-socketio. Для того чтобы подключить данное расширение, следует передать объект класса Flask в конструктор класса SocketIO. После этого переменная \textbf{app} имеет возможность обрабатывать события, связанные с веб-сокетами. Это стандартный способ добавления Flask расширений в сервер.
 
 Так как предложение имеет лишь одну страницу, а вся навигация происходит строго в браузере, то на сервере зарегистрированы лишь два обработчка HTTP запросов - для самой страницы:
 
-\begin{ListingEnv}[H]
-  \caption{Обработчик HTTP запроса в Flask приложении}
-  \label{list:hwbeauty}
-  \begin{lstlisting}[language=Python]
-    @app.route("/")
-    def index():
-      rtk.logm.updateAvailableLogs()
-      return render_template("index.html", logs = rtk.logm.available_logs, system_status = reach_tools.getSystemStatus())
-  \end{lstlisting}
-\end{ListingEnv}
+\lstinputlisting[
+  label={listings:server_http_handler},
+  caption={Обработчик HTTP запроса в Flask приложении},
+  style={java}
+]
+{src/server_http_handler.py}
 
 И для скачивания логов:
 
-\begin{ListingEnv}[H]
-  \caption{Обработчик HTTP запроса в Flask приложении}
-  \label{list:hwbeauty}
-  \begin{lstlisting}[language=Python]
-    @app.route("/logs/download/<path:log_name>")
-    def downloadLog(log_name):
-      full_log_path = rtk.logm.log_path + "/" + log_name
-      return send_file(full_log_path, as_attachment = True)
-  \end{lstlisting}
-\end{ListingEnv}
+\lstinputlisting[
+  label={listings:file_download_http_server},
+  caption={Скачивание файла в Flask приложении},
+  style={java}
+]
+{src/file_download_http_server.py}
 
 Практически весь остальной код данного модуля - регистрация обработчиков событий, связанных с веб-сокетами. Синтаксис у них такой же. Например, событие запуск режима ровера обрабатывается вот так:
 
-\begin{ListingEnv}[H]
-  \caption{Обработчик HTTP запроса в Flask приложении}
-  \label{list:hwbeauty}
-  \begin{lstlisting}[language=Python]
-    @socketio.on("launch rover", namespace="/test")
-    def launchRover():
-        rtk.launchRover()
-  \end{lstlisting}
-\end{ListingEnv}
+\lstinputlisting[
+  label={listings:server_websocket_handler},
+  caption={Обработчик WebSocket события в Flask приложении},
+  style={java}
+]
+{src/server_websocket_handler.py}
 
 Следует обратить внимание на особенность синтаксиса в этих примерах. Декораторы используются для привязки нижеописанных функций к событиям, переданным в качестве параметров декоратору.
 
 Главный цикл крайне прост. Он всего лишь запускает сервер и обрабатывает исключение KeyboardInterrupt(нажатие CTRL+C), корректно завершая все потоки. Это полезное дополнение при разработке.
 
-\begin{ListingEnv}[H]
-  \caption{Главный цикл}
-  \label{list:hwbeauty}
-  \begin{lstlisting}[language=Python]
-    if __name__ == "__main__":
-      try:
-        socketio.run(app, host = "0.0.0.0", port = 80)
-      except KeyboardInterrupt:
-        rtk.server_not_interrupted = False
-        rtk.led.blinker_not_interrupted = False
-        rtk.waiting_for_single = False
-
-        if rtk.coordinate_thread is not None:
-            rtk.coordinate_thread.join()
-
-        if rtk.satellite_thread is not None:
-            rtk.satellite_thread.join()
-
-        if rtk.led.blinker_thread is not None:
-            rtk.led.blinker_thread.join()
-
-  \end{lstlisting}
-\end{ListingEnv}
+\lstinputlisting[
+  label={listings:main_loop},
+  caption={Главный цикл Flask приложения},
+  style={java}
+]
+{src/main_loop.py}
 
 \section{Веб-страница и модули клиентской части} \label{sect3_2}
 
@@ -326,33 +219,21 @@
 
 Весь интерфейс приложения строится вокруг одной HTML страницы. Все элементы на странице выбраны из стандартных элементов UI фрэймворка jQuery Mobile. Общая структура документа - несколько \textbf{div} элементов со свойством \textbf{data-role} выставленным на значение \textbf{"page"}. Это дает возможность перемещаться между различными экранами без необходимости перезагрузки страницы, или обращения к серверу, как к таковому.
 
-\begin{ListingEnv}[H]
-  \caption{Создание элемента-страницы в jQuery Mobile}
-  \label{list:hwbeauty}
-  \begin{lstlisting}[language=HTML]
-    <div data-role="page" id="status_page"></div>
-  \end{lstlisting}
-\end{ListingEnv}
+\lstinputlisting[
+  label={listings:jqm_element_example},
+  caption={Создание элемента-страницы в jQuery Mobile},
+  style={java}
+]
+{src/jqm_element_example.html}
 
 Кроме основных элементов, в HTML файле создаются диалоговые окна. Они остаются невидимыми для пользователя до тех пор, пока не приходит нужный момент. Пример всплывающего окна, появлящегося при потере связи с сервером:
 
-\begin{ListingEnv}[H]
-  \caption{Создание всплывающего окна в jQuery Mobile}
-  \label{list:hwbeauty}
-  \begin{lstlisting}[language=HTML]
-    <div data-role="popup" id="popupDisconnected" data-overlay-theme="a" data-dismissible="false">
-      <div data-role="header">
-        <h1>Warning</h1>
-      </div>
-      <div data-role="main" class="ui-content">
-        <p>Lost connection with the server. Please check your network, then try refreshing the page.</p>
-      </div>
-      <div data-role="footer">
-        <h1> </h1>
-      </div>
-    </div>
-  \end{lstlisting}
-\end{ListingEnv}
+\lstinputlisting[
+  label={listings:popup_window},
+  caption={Создание всплывающего окна в jQuery Mobile},
+  style={java}
+]
+{src/popup_window.html}
 
 Сама по себе страница - лишь скелет для запуска клиентских скриптов. Все основные изменения внутри страницы и приложения, такие как обновление информации на графике или создание и отправка данных формы происходят с помощью Javascript.
 
@@ -360,32 +241,21 @@
 
 Модуль \textbf{main.js} интересен в первую очередь как место инициализации объекта, олицетворяющего соединения с сервером. Он используется для связи с сервером. С помощью переменной \textbf{socket} создаются обработчики различных WebSocket сообщений.
 
-\begin{ListingEnv}[H]
-  \caption{Создание объекта для приема WebSocket сообщений}
-  \label{list:hwbeauty}
-  \begin{lstlisting}[language=C++]
-    socket = io.connect("http://" + document.domain + ":" + location.port + namespace);
-  \end{lstlisting}
-\end{ListingEnv}
+\lstinputlisting[
+  label={listings:websocket_object},
+  caption={Создание объекта для приема WebSocket сообщений},
+  style={java}
+]
+{src/websocket_object.js}
 
 Рассмотрим, как происходит обработки приходящих сообщений. Для того, чтобы например отображать координаты, надо обрабатывать сообщения с заголовком \textbf{"coordinate broadcast"}.
 
-\begin{ListingEnv}[H]
-  \caption{Обработка сообщения \textbf{"coordinate broadcast"} на стороне клиента}
-  \label{list:hwbeauty}
-  \begin{lstlisting}[language=C++]
-    socket.on("coordinate broadcast", function(msg) {
-      if ((active_tab == "Status") && (isActive == true)) {
-        console.groupCollapsed('Coordinate msg received:');
-        for (var k in msg)
-            console.log(k + ':' + msg[k]);
-        console.groupEnd();
-
-        updateCoordinateGrid(msg);
-      }
-    });
-  \end{lstlisting}
-\end{ListingEnv}
+\lstinputlisting[
+  label={listings:coordinate_broadcast},
+  caption={Обработка сообщения \textbf{"coordinate broadcast"} на стороне клиента},
+  style={java}
+]
+{src/coordinate_broadcast.js}
 
 Извлеченные данные, в переменной msg передаются в функцию \textbf{updateCoordinateGrid}, выставляющую значения пришедших координат в нужные элементы на странице. Со стороны сервера эти сообщения отправляет поток, созданный из функции \textbf{broadcastCoordinates}, описанный в главе 3.1.3.
 
@@ -393,39 +263,23 @@
 
 Модуль handlers.js в первую очередь предназначен для «оживления» элементов страницы. В нем регистрируются обработчики большинства событий связанных с интерфейсом приложения. Примером могут служить такие взаимодействия, как отправление команды запуска ровера и по нажатию кнопки или изменение отображаемого конфигурационного файла при изменении значения селектора.
 
-\begin{ListingEnv}[H]
-  \caption{Регистрация обработчика нажатия на кнопку start}
-  \label{list:hwbeauty}
-  \begin{lstlisting}[language=C++]
-    $(document).on("click", "#start_button", function(e) {
-      var mode = $("input[name=radio_base_rover]:checked").val();
-      console.log("Starting " + mode);
-      socket.emit("start " + mode);
-
-      if (mode == "base") {
-        chart.cleanStatus(mode, "started");
-      }
-
-      $('#start_button').css('display', 'none');
-      $('#stop_button').css('display', 'inline-block');
-    });
-  \end{lstlisting}
-\end{ListingEnv}
+\lstinputlisting[
+  label={listings:start_handler},
+  caption={Регистрация обработчика нажатия на кнопку start},
+  style={java}
+]
+{src/start_handler.js}
 
 Кнопка \textbf{start} при нажатии отправляет сообщение \textbf{«start rover»} или \textbf{«start base»}, в зависимости от режима и становится невидимой, уступив место кнопке \textbf{stop}.
 
 Также, подобные события можно привязать к менее очевидным элементам интерфейса. Например, каждый раз, при переходе во вкладку \textbf{Logs}, браузер отправляет запрос о текущем количестве логов и свободном пространстве на устройстве.
 
-\begin{ListingEnv}[H]
-  \caption{Обработка перехода на вкладку \textbf{Logs}}
-  \label{list:hwbeauty}
-  \begin{lstlisting}[language=C++]
-    $(document).on("click", ".logs_page", function() {
-      socket.emit("get logs list");
-      socket.emit("get available space");
-    });
-  \end{lstlisting}
-\end{ListingEnv}
+\lstinputlisting[
+  label={listings:logs_tab_handler},
+  caption={Обработка перехода на вкладку \textbf{Logs}},
+  style={java}
+]
+{src/logs_tab_handler.js}
 
 \subsection{График уровней приема спутников. Модуль graph.js} \label{subsect3_2_3}
 
@@ -439,16 +293,12 @@
 
 График написан с помощью библиотеки \textbf{D3.js}. Вся анимация создается в специальном HTML тэге - <svg>:
 
-\begin{ListingEnv}[H]
-  \caption{}
-  \label{list:hwbeauty}
-  \begin{lstlisting}[language=C++]
-    this.svg = d3.select('#bar-chart').append('svg')
-      .attr('width', width + margin.left + margin.right)
-      .attr('height', height + margin.top + margin.bottom)
-      .style('background', 'white');
-  \end{lstlisting}
-\end{ListingEnv}
+\lstinputlisting[
+  label={listings:graph_golder},
+  caption={Инициализация \textbf{svg} элемента для создания графика},
+  style={java}
+]
+{src/graph_holder.js}
 
 Результат представляет собой гистограмму, столбцы которой отражают различные спутники, а их высота показывает качество приема данного спутника. Качество выражается значением величины «отношение сигнал/шум»(\textbf{signal to noise ratio} или \textbf{SNR}), полученным из RTKLIB. На графике помещается не больше десяти значений с лучшим приемом. Если ровер получает поправки от базы, то на графике также отображаются значения SNR тех же спутников для базы.
 
@@ -461,17 +311,14 @@
 
 \subsection{Создание и чтение форм конфигурации. Модуль config.js} \label{subsect3_2_3}
 
-Модуль \textbf{config.js} отвечает за работу с формами. Конфигурационные файлы RTKRCV, так же как и настройки STR2STR, которые задаются с помощью параметров запуска, имеют особенный синтаксис, особенно при задании входящих и исходящих потоков данных. Например, для того чтобы настроить RTKRCV на вывод координат через последовательный интерфейс, нужно выставить значения двух переменных
+Модуль \textbf{config.js} отвечает за работу с формами. Конфигурационные файлы RTKRCV, так же как и настройки STR2STR, которые задаются с помощью параметров запуска, имеют особенный синтаксис, особенно при задании входящих и исходящих потоков данных. Например, для того чтобы настроить RTKRCV на вывод координат через последовательный интерфейс, нужно выставить значения трех переменных, как на рисунке .
 
-\begin{ListingEnv}[H]
-  \caption{}
-  \label{list:hwbeauty}
-  \begin{lstlisting}
-    outstr1-type       =serial
-    outstr1-path       =ttyMFD2:57600:8:n:1:off
-    outstr1-format     =llh
-  \end{lstlisting}
-\end{ListingEnv}
+\lstinputlisting[
+  label={listings:rtkrcv},
+  caption={Настройка вывода координат из RTKRCV}
+  style={java}
+]
+{src/rtkrcv.conf}
 
 Задача модуля \textbf{config.js} отобразить эти самые настройки в удобном для чтения и изменения виде. При запуске с такими настройками RTKRCV обратится к \textbf{/dev/ttyMFD2} с настройкой скорости передачи данных 230400 бод. Пользователю неудобно работать с такой строкой и поэтому форма с настройками во вкладке \textbf{Config} превратит данную строку в раскрытую форму. Третья опция изменяет формат вывода на \textbf{llh}, или широта, долгота, высота и представлена отдельным селектором, следующей опцией. Результат отображения представлен на рисунке 3.2.
 

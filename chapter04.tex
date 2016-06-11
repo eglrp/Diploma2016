@@ -95,7 +95,66 @@
   \caption{Вкладки приложения в браузере смартфона}
 \end{figure}
 
-\subsection{Тестирование работы режима ровера} \label{subsect4_2_1}
+\clearpage
+
+\subsection{Тестирование работы режима ровера} \label{subsect4_2_2}
+
+\underline{Исходные данные.} Приложение запущено и веб-страница открыта в браузере.
+
+\underline{Ожидаемый результат.} При переходе во вкладку \textbf{Config} и нажатии на кнопку \textbf{Start}, приложение переходит в состояние запущенного ровера. Во вкладке \textbf{Status} отображаемый режим работы  должен измениться на \textbf{single}, а график должен показать уровни приема спутников, при условии наличии доступа к антенне на используемом приемнике. В логах, доступных при помощи \textbf{journalctl} отсутствуют ошибки.
+
+\underline{Результат.} Совпал с ожидаемым. На группе рисунков 4.2 представлены результаты старта режима ровера вместе с подключенной антенной.
+
+\begin{figure}
+  \label{img:latex}
+  \center
+  \includegraphics[width=.35\linewidth]{ui_testing_rover_start}
+  \includegraphics[width=.35\linewidth]{ui_testing_rover_started}
+  \caption{Старт в режиме ровера и изменившийся экран статуса}
+\end{figure}
+
+\subsection{Тестирование настройки режима ровера} \label{subsect4_2_3}
+
+\underline{Исходные данные.} Приложение запущено в режиме ровера.
+
+\underline{Ожидаемый результат.} Для этого теста следует перейти во вкладку \textbf{Config} и изменить текущий режим работы на \textbf{kinematic}. Указать источник поправок. В данном случае - база доступная в локальной сети. Выбрав соответствующие параметры - нажать кнопку \textbf{Save} и подтвердить перезапуск с новыми параметрами. Перейти во вкладку \textbf{Status} и удостовериться в приеме поправок - на графике отобразятся уровни приема спутников базы в виде серых столбцов.
+
+\underline{Результат.} Совпал с ожидаемым. На группе рисунков 4.3 представлен процесс настройки ровера, а на рисунке 4.4 - вкладка Status после успешной настройки.
+
+\begin{figure}
+  \label{img:latex}
+  \center
+  \includegraphics[width=.35\linewidth]{ui_testing_rover_settings}
+  \includegraphics[width=.35\linewidth]{ui_testing_rover_load_settings}
+  \caption{Изменение настроек ровера для приема поправок с базы}
+\end{figure}
+
+\begin{figure}[ht]
+  \center
+  \includegraphics [scale=0.3] {ui_testing_rover_kinematic}
+  \caption{Статус ровера при получении поправок с базы}
+  \label{img:latex}
+\end{figure}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

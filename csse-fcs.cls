@@ -330,6 +330,9 @@
 \newcounter{total@cite}
 \newcounter{total@appendix}
 
+\newcounter{pagesWithoutAppendix} % custom
+\newcounter{pagesOnlyAppendix} % custom
+
 \gdef\total@page{0}
 \gdef\total@figure{0}
 \gdef\total@table{0}
@@ -347,7 +350,7 @@
 }
 
 \AtEndDocument{
-  \setcounter{total@page}{\value{page}}
+  \setcounter{total@page}{\value{page}-\value{pagesOnlyAppendix}}
   %
   \addtocounter{total@figure}{\value{figure}}
   \addtocounter{total@table}{\value{table}}

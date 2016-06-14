@@ -244,7 +244,7 @@
 
 \subsection{Инициализация клиента. Модуль main.js} \label{subsect3_2_2}
 
-Модуль \textbf{main.js} важен как место инициализации объекта, олицетворяющего соединения с сервером(лист. 3.15). Он используется для связи с сервером. С помощью переменной \textbf{socket} создаются обработчики различных WebSocket сообщений.
+Модуль \textbf{main.js} важен как место инициализации объекта, олицетворяющего соединения с сервером(лист. 3.15). Он используется для связи с сервером. С помощью переменной \textbf{socket} создаются обработчики различных WebSocket сообщений \cite{socketio-docs}.
 
 \lstinputlisting[
   label={listings:websocket_object},
@@ -378,37 +378,25 @@
 Кроме этого, в проекте присутствуют служебные модули, отвечающие за работу приложения на Emlid Reach:
 
 \begin{itemize}
-  \item reach_tools.py - набор утилит, в числе которых определение свободного места, отведенного под логи, а также установка системного времени по GPS;
-  \item reach_bluetooth - инициализация Bluetooth на устройстве и создание TCP - Bluetooth моста, для передачи ГНСС данных через Bluetooth.
+  \item reach\_tools.py - набор утилит, в числе которых определение свободного места, отведенного под логи, а также установка системного времени по GPS;
+  \item reach\_bluetooth - инициализация Bluetooth на устройстве и создание TCP - Bluetooth моста, для передачи ГНСС данных через Bluetooth.
 \end{itemize}
 
+На группе рисунков 3.4 изображены все вкладки приложения.
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+\begin{figure}
+  \label{img:latex}
+  \begin{subfigure}{\linewidth}
+    \center
+    \includegraphics[width=.35\linewidth]{ui_testing_status_tab}
+    \includegraphics[width=.35\linewidth]{ui_testing_config_tab}
+    \caption{Status и Config}
+  \end{subfigure}\par\medskip
+  \begin{subfigure}{\linewidth}
+    \center
+    \includegraphics[width=.35\linewidth]{ui_testing_logs_tab}
+    \includegraphics[width=.35\linewidth]{ui_testing_settings_tab}
+    \caption{Logs и Settings}
+  \end{subfigure}\par\medskip
+  \caption{Вкладки приложения в браузере смартфона}
+\end{figure}

@@ -342,6 +342,55 @@
 
 
 
+\section{Результаты разработки} \label{sect3_4}
+
+В результате было разработано приложение, удовлетворяющее вышеназванным требованиям. На рисунке 3.3 приведено дерево конечного проекта, включающего все модули.
+
+\begin{figure}[ht]
+  \center
+  \includegraphics [scale=0.4] {project_tree}
+  \caption{Дерево разработанного проекта}
+  \label{img:latex}
+\end{figure}
+
+Были разработаны классы, инкапсулирующие работу с RTKLIB:
+
+\begin{itemize}
+  \item RtkController - работа с RTKRCV;
+  \item Str2StrController - работа с STR2STR;
+  \item ConvbinController - работа с CONVBIN;
+  \item ConfigManager - управление конфигурационными файлами;
+  \item LogManager - управление логами;
+  \item RTKLIB - инкапсуляция работы всех вышеперечисленных файлов.
+\end{itemize}
+
+Модуль server.py, отвечающий за обработку HTTP и WebSocket запросов.
+
+Веб-страница index.html, являющаяся основой одностраничного приложения. Для ее работы используются Javascript модули:
+
+\begin{itemize}
+  \item main.js - создание обработчика WebSocket сообщений, общая инициализация;
+  \item config.js - работа с формами во вкладке Config;
+  \item handlers.js - работа с интерфейсом страницы;
+  \item graph.js - работа с графиком.
+\end{itemize}
+
+Кроме этого, в проекте присутствуют служебные модули, отвечающие за работу приложения на Emlid Reach:
+
+\begin{itemize}
+  \item reach_tools.py - набор утилит, в числе которых определение свободного места, отведенного под логи, а также установка системного времени по GPS;
+  \item reach_bluetooth - инициализация Bluetooth на устройстве и создание TCP - Bluetooth моста, для передачи ГНСС данных через Bluetooth.
+\end{itemize}
+
+
+
+
+
+
+
+
+
+
 
 
 

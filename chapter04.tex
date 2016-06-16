@@ -156,7 +156,7 @@
     \center
     \includegraphics[width=.35\linewidth]{ui_testing_rover_settings}
     \includegraphics[width=.35\linewidth]{ui_testing_rover_load_settings}
-    \caption{Настройка ровера  для приема поправок с базы}
+    \caption{Настройка ровера для приема поправок с базы}
     \label{img:test_rover_settings}
   \end{subfigure}\par\medskip
   \begin{subfigure}{\linewidth}
@@ -166,10 +166,7 @@
     \label{img:test_rover_settings_result}
   \end{subfigure}\par\medskip
   \caption{Тестирование конфигурации ровера}
-  \label{img:alltabs2}
 \end{figure}
-
-\clearpage
 
 \subsection{Запуск режима базы и проверка отправки поправок} \label{subsect4_2_3}
 
@@ -181,12 +178,6 @@
 
 Каждое из действий изображено на группе рисунков \ref{img:base_settings_testing}.
 
-\begin{enumerate}
-  \item Перейти во вкладку \textbf{Config}, перейти в режим базы с помощью переключателя в верхней части вкладки;
-  \item Настроить отправку поправок в TCP сокет;
-  \item Запустить с помощью кнопки \textbf{Save \& Load}.
-\end{enumerate}
-
 \begin{figure}
   \center
   \includegraphics[width=.3\linewidth]{ui_testing_base_mode}
@@ -196,9 +187,13 @@
   \label{img:base_settings_testing}
 \end{figure}
 
-\underline{Результат.} Совпал с ожидаемым. Для проверки доступности поправок на TCP порту 9000 была использована программа \textbf{netcat}. Результат в виде бинарного RTCM3 протокола, который корректно не отображается в терминале, представлен на рисунке \ref{img:input_corrections}.
+\begin{enumerate}
+  \item Перейти во вкладку \textbf{Config}, перейти в режим базы с помощью переключателя в верхней части вкладки;
+  \item Настроить отправку поправок в TCP сокет;
+  \item Запустить с помощью кнопки \textbf{Save \& Load}.
+\end{enumerate}
 
-\clearpage
+\underline{Результат.} Совпал с ожидаемым. Для проверки доступности поправок на TCP порту 9000 была использована программа \textbf{netcat}. Результат в виде бинарного RTCM3 протокола, который корректно не отображается в терминале, представлен на рисунке \ref{img:input_corrections}.
 
 \begin{figure}[ht]
   \center
